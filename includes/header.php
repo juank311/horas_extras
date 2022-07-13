@@ -1,13 +1,17 @@
 <?php 
+session_start();
+
+if (!isset($_SESSION['activo'])) {
+    header('Location:index.php');
+}
+
+$data_employee = $_SESSION['data_employee'];
+
 include_once('conexion_sqlsrv.php');
 //configuracion de zona horaria 
 date_default_timezone_set('America/Bogota');
 ?>
 <!DOCTYPE html>
-<!--
-This is a starter template page. Use this page to start your new project from
-scratch. This page gets rid of all links and provides the needed markup only.
--->
 <html lang="es">
 
 <head>
@@ -54,7 +58,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- Main Sidebar Container -->
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
       <!-- Brand Logo -->
-      <a href="index.php" class="brand-link">
+      <a href="panel.php" class="brand-link">
         <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
         <span class="brand-text font-weight-light">APP Horas Extras</span>
       </a>
@@ -66,7 +70,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <img src="dist/img/images.png" class="img-circle elevation-2" alt="User Image">
           </div>
           <div class="info">
-            <p class="text-white">Alexander Pierce</p>
+            <p class="text-white"><?php echo $data_employee->name." " .$data_employee->last_name;?></p>
           </div>
         </div>
 
@@ -77,7 +81,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                with font-awesome or any other icon font library -->
 
             <li class="nav-item">
-              <a href="index.php" class="nav-link">
+              <a href="panel.php" class="nav-link">
                 <i class="nav-icon fas fa-th"></i>
                 <p>
                   Panel de control
@@ -97,6 +101,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <i class="nav-icon fas fa-users"></i>
                 <p>
                   Lista Usuarios
+                </p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="close_session.php" class="nav-link">
+              <i class="nav-icon fa fa-times-circle" ></i>
+                <p>
+                  Salir
                 </p>
               </a>
             </li>

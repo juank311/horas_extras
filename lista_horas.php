@@ -3,7 +3,8 @@
 <?php
 //variables no existentes 
 
-$current_date = date('dd-m-y');
+$current_date = date('d-M-Y');
+echo $current_date;
 $type = "Horas Extras";
 //Insertamos datos
 if (isset($_POST["registrarHoras"])) {
@@ -29,7 +30,7 @@ if (isset($_POST["registrarHoras"])) {
     $stmt_insert->bindParam(":start_hour", $start_hour, PDO::PARAM_STR);
     $stmt_insert->bindParam(":final_hour", $final_hour, PDO::PARAM_STR);
     $stmt_insert->bindParam(":id_employee", $id_employee, PDO::PARAM_INT);
-    $stmt_insert->bindParam(":creation_date", $creation_date, PDO::PARAM_STR);
+    $stmt_insert->bindParam(":creation_date", $current_date, PDO::PARAM_STR);
 
     $resultado = $stmt_insert->execute();
 
