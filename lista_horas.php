@@ -1,6 +1,48 @@
 <?php include "includes/header.php" ?>
 
 <?php
+//variables no existentes 
+
+$current_date = date('dd-m-y');
+$type = "Horas Extras";
+//Insertamos datos
+if (isset($_POST["registrarHoras"])) {
+
+  //Obtener valores
+  
+  $id_employee = $_POST["id_employee"];
+  $date = $_POST["date"];
+  $festive = $_POST["festive"];
+  $start_hour = $_POST["start_hour"];
+  $final_hour = $_POST["final_hour"];
+  $creation_date = $current_date;
+  
+//Si entra por aquí es porque la cédula no existe y se puede crear el registro
+    $query_insert = "INSERT INTO records(type, date, festive, start_hour, final_hour, id_employee, creation_date)
+    VALUES(:type, :date, :festive, :start_hour, :final_hour, :id_employee, :creation_date)";
+
+    $stmt_insert = $conn->prepare($query_insert);
+
+    $stmt_insert->bindParam(":type", $type, PDO::PARAM_STR);
+    $stmt_insert->bindParam(":date", $date, PDO::PARAM_STR);
+    $stmt_insert->bindParam(":festive", $festive, PDO::PARAM_STR);
+    $stmt_insert->bindParam(":start_hour", $start_hour, PDO::PARAM_STR);
+    $stmt_insert->bindParam(":final_hour", $final_hour, PDO::PARAM_STR);
+    $stmt_insert->bindParam(":id_employee", $id_employee, PDO::PARAM_INT);
+    $stmt_insert->bindParam(":creation_date", $creation_date, PDO::PARAM_STR);
+
+    $resultado = $stmt_insert->execute();
+
+    if ($resultado) {
+      $mensaje = "Registro creado correctamente";
+    } else {
+      $error = "Error, no se pudo crear el registro";
+    }
+  }
+
+?>
+
+<?php
 $query_search = "SELECT * FROM records";
 $stmt_search = $conn->query($query_search);
 $recordsTable = $stmt_search->fetchAll(PDO::FETCH_OBJ);
@@ -99,11 +141,11 @@ $recordsTable = $stmt_search->fetchAll(PDO::FETCH_OBJ);
                       <div class="row">
                         <div class="col-xs-6">
                           <div class="form-group">
-                            <label for="centrocostos">Buscar empleado:</label>
-                            <input type="text" class="form-control" id="buscaCedula" placeholder="Ingresa un # de cédula">
+                            <label for="idCard_search">Buscar empleado:</label>
+                            <input type="text" class="form-control" id="idCard_search" placeholder="Ingresa un # de cédula">
 
-                            <!-- En este div se muestran los mensajes de rror si los hubiera-->
-                            <div id="mensajes" style="color: red;"></div>
+                            <!-- En este div se muestran los mensaje de error si los hubiera-->
+                            <div id="mensaje" style="color: red;"></div>
                           </div>
                         </div>
 
@@ -111,36 +153,40 @@ $recordsTable = $stmt_search->fetchAll(PDO::FETCH_OBJ);
                           <div class="form-group">
                             <!-- Our search button -->
                             <!-- Our search button -->
-                            <!--<input type="button" id="buscar_cedula" value="Search">	-->
+                            <!--<input type="button" id="buscar_id_card" value="Search">	-->
                             &nbsp;
-                            <button id="buscar_cedula" class="btn btn-primary"><i class="fa fa-search"></i> Buscar</button>
+                            <button id="btn_search_idcard" class="btn btn-primary"><i class="fa fa-search"></i> Buscar</button>
                           </div>
                         </div>
                       </div>
 
-
+                      <!-- FORMULARIO DE CAMPOS DEL MODAL -->
                       <form role="form" method="POST" action="<?php $_SERVER['PHP_SELF']; ?>">
                         <div class="row">
                           <div class="col-sm-5">
                             <div class="form-group">
-                              <label for="nombre">Id empleado: </label>
-                              <input type="text" class="form-control" name="idEmpleado" id="idEmpleado" readonly>
+                              <label for="id_employee">ID empleado: </label>
+                              <input type="text" class="form-control" name="id_employee" id="id_employee" readonly>
                             </div>
                           </div>
-
+                          <!-- Nombre -->
                           <div class="col-sm-5">
                             <div class="form-group">
-                              <label for="centrocostos">Nombre de empleado: </label>
-                              <input type="text" class="form-control" id="nombre" readonly>
+                              <label for="name_employee">
+                                <span>Nombre de empleado:</span>
+                              </label>
+                              <input type="text" class="form-control" id="name_employee" name="name" readonly>
+                              <!-- Apellidos -->
+                              <label for="lastname_employee">Apellidos: </label>
+                              <input type="text" class="form-control" id="lastname_employee" name="last_name" readonly>
                             </div>
                           </div>
                         </div>
-
                         <!-- Date -->
                         <div class="form-group">
                           <label>Fecha:</label>
                           <div class="input-group date" id="fecha" data-target-input="nearest">
-                            <input type="text" class="form-control datetimepicker-input" data-target="#fecha" name="fecha">
+                            <input type="text" class="form-control datetimepicker-input" data-target="#fecha" name="date">
                             <div class="input-group-append" data-target="#fecha" data-toggle="datetimepicker">
                               <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                             </div>
@@ -153,13 +199,14 @@ $recordsTable = $stmt_search->fetchAll(PDO::FETCH_OBJ);
 
                         <div class="row">
                           <div class="col-sm-10 offset-1">
-
+                            <!-- FESTIVOO -->
                             <div class="form-group">
                               <label for="festivo">Festivo:</label>
-                              <select class="form-control" name="festivo" id="festivo">
+                              <select class="form-control" name="festive" id="festivo">
                                 <option value="">--Seleccionar un valor--</option>
                                 <option value="Domingo">Domingo</option>
                                 <option value="Festivo">Festivo</option>
+                                <option value="0">Normal</option>
                               </select>
                             </div>
                           </div>
@@ -174,7 +221,7 @@ $recordsTable = $stmt_search->fetchAll(PDO::FETCH_OBJ);
                                 <label>Hora Inicial:</label>
 
                                 <div class="input-group date" id="timepicker" data-target-input="nearest">
-                                  <input type="text" class="form-control datetimepicker-input" data-target="#timepicker" name="horaInicial">
+                                  <input type="text" class="form-control datetimepicker-input" data-target="#timepicker" name="start_hour">
                                   <div class="input-group-append" data-target="#timepicker" data-toggle="datetimepicker">
                                     <div class="input-group-text"><i class="far fa-clock"></i></div>
                                   </div>
@@ -192,7 +239,7 @@ $recordsTable = $stmt_search->fetchAll(PDO::FETCH_OBJ);
                               <label>Hora Final:</label>
 
                               <div class="input-group date" id="timepicker2" data-target-input="nearest">
-                                <input type="text" class="form-control datetimepicker-input horasReg" data-target="#timepicker2" name="horaFinal">
+                                <input type="text" class="form-control datetimepicker-input horasReg" data-target="#timepicker2" name="final_hour">
                                 <div class="input-group-append" data-target="#timepicker2" data-toggle="datetimepicker">
                                   <div class="input-group-text"><i class="far fa-clock"></i></div>
                                 </div>
@@ -206,7 +253,7 @@ $recordsTable = $stmt_search->fetchAll(PDO::FETCH_OBJ);
 
                     </div>
 
-
+                    <!-- BOTONESSSS -->
                     <div class="box-footer">
                       <div class="modal-footer">
                         <button type="button" class="btn btn-success pull-left" data-dismiss="modal"><i class="far fa-window-close"></i> Cerrar</button>
@@ -255,6 +302,7 @@ $recordsTable = $stmt_search->fetchAll(PDO::FETCH_OBJ);
               format: 'HH:mm',
               enabledHours: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
               stepping: 30
+
             })
 
             //Hora Final
@@ -264,5 +312,56 @@ $recordsTable = $stmt_search->fetchAll(PDO::FETCH_OBJ);
               stepping: 30
             })
 
+
+            //si el boton ha sido clickeado se identifica con #btn_search_idcard 
+            $('#btn_search_idcard').click(function() {
+
+              //Si el botón ha si do clickeado
+              //Obtengo el código del empleado
+              let id_card = $('#idCard_search').val();
+
+              if (id_card == "" || id_card == null) {
+                $('#mensaje').html("Error, campo vacío, ingresa un # de cédula");
+                /* return false; */
+              } else {
+                //Enviar con ajax
+                $.ajax({
+                  //La url del archivo php
+                  type: "GET",
+                  url: "http://localhost/horas_extras/search_idcard.php",
+                  data: {
+                    card_id: id_card //<- card_id es la variable modificable 
+                  },
+                  success: function(returnData) {
+                    console.log(JSON.parse(returnData));
+                    $('#name_employee').val("");
+                    $('#lastname_employee').val("");
+                    $('#id_employee').val("");
+                    
+
+                    //Parsear el json
+                    let results = JSON.parse(returnData);
+
+                    $.each(results, function(key, value) {
+
+                      if (value == "" || value == null) {
+                        $('#name_employee').val("");
+                        $('#id_employee').val("");
+                        $('#mensaje').html("No existe empleado con esa cédula!");
+                      } else {
+                        $('#name_employee').val(value.name);
+                        $('#lastname_employee').val(value.last_name);
+                        $('#id_employee').val(value.id);
+                        $('#mensaje').html("");
+                      }
+
+                    });
+                  },
+                  error: function(error) {
+                    $('#mensaje').html("No existe empleado con esa cédula!");
+                  }
+                });
+              }
+            });
           });
         </script>
